@@ -9,9 +9,105 @@
 import UIKit
 
 class GithubAPIClient {
+    //star repository
+    class func starRepository(fullName: String, completion:()->()) {
+        //create a session
+        let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
+        
+        //create the url
+        let urlString = "\(Secrets.githubStarApiUrl)/\(fullName)"
+        let userURL = NSURL(string: urlString)
+        guard let unwrappedURL = userURL else { fatalError("Invalid URL") }
+        
+        //create a request
+        let request = NSMutableURLRequest(URL: unwrappedURL)
+        request.HTTPMethod = "PUT"
+        request.addValue(Secrets.myAccessToken, forHTTPHeaderField: "Authorization")
+        
+        //create the task with request
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            guard let responseValue = response as? NSHTTPURLResponse else {
+                assertionFailure("response could not get assigned")
+                return
+            }
+            if responseValue.statusCode == 204 {
+                print("starred")
+                completion()
+            }
+            else {
+                print("other status code: \(responseValue.statusCode)")
+            }
+        }
+        task.resume()
+    }
+    
+    //unstar repository
+    class func unstarRepository(fullName: String, completion:()->()) {
+        //create a session
+        let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
+        
+        //create the url
+        let urlString = "\(Secrets.githubStarApiUrl)/\(fullName)"
+        let userURL = NSURL(string: urlString)
+        guard let unwrappedURL = userURL else { fatalError("Invalid URL") }
+        
+        //create a request
+        let request = NSMutableURLRequest(URL: unwrappedURL)
+        request.HTTPMethod = "DELETE"
+        request.addValue(Secrets.myAccessToken, forHTTPHeaderField: "Authorization")
+        
+        //create the task with request
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            guard let responseValue = response as? NSHTTPURLResponse else {
+                assertionFailure("response could not get assigned")
+                return
+            }
+            if responseValue.statusCode == 204 {
+                completion()
+            }
+            else {
+                print("other status code: \(responseValue.statusCode)")
+            }
+        }
+        task.resume()
+    }
+
+    
+    class func checkIfRepositoryIsStarred(fullName: String, completion: (Bool) -> ()) {
+        //create a session
+        let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
+        
+        //create the url
+        let urlString = "\(Secrets.githubStarApiUrl)/\(fullName)"
+        let userURL = NSURL(string: urlString)
+        guard let unwrappedURL = userURL else { fatalError("Invalid URL") }
+        
+        //create a request
+        let request = NSMutableURLRequest(URL: unwrappedURL)
+        request.HTTPMethod = "GET"
+        request.addValue(Secrets.myAccessToken, forHTTPHeaderField: "Authorization")
+        
+        //create the task with request
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            guard let responseValue = response as? NSHTTPURLResponse else {
+                assertionFailure("response could not get assigned")
+                return
+            }
+            switch responseValue.statusCode {
+            case 204:
+                completion(true)
+            case 404:
+                completion(false)
+            default:
+                print("other status code: \(responseValue.statusCode)")
+            }
+        }
+        task.resume()
+    }
+
     
     class func getRepositoriesWithCompletion(completion: (NSArray) -> ()) {
-        let urlString = "\(githubAPIURL)/repositories?client_id=\(githubClientID)&client_secret=\(githubClientSecret)"
+        let urlString = "\(Secrets.githubAPIURL)/repositories?client_id=\(Secrets.clientID)&client_secret=\(Secrets.clientSecret)"
         let url = NSURL(string: urlString)
         let session = NSURLSession.sharedSession()
         
@@ -27,6 +123,5 @@ class GithubAPIClient {
         }
         task.resume()
     }
-    
 }
 

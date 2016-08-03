@@ -26,7 +26,6 @@ class ReposTableViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.store.repositories.count
     }
@@ -40,5 +39,26 @@ class ReposTableViewController: UITableViewController {
 
         return cell
     }
-
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let selectedRepo = store.repositories[indexPath.row]
+        store.toggleStarStatusForRepository(selectedRepo) { (starred) in
+            var message = ""
+            if starred == true {
+                message = "You just starred \(selectedRepo.fullName)"
+            }
+            else {
+                message = "You just unstarred \(selectedRepo.fullName) "
+            }
+            let alertController = UIAlertController(title: "Action Taken", message: message, preferredStyle: .Alert)
+            let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                // ...
+            }
+            alertController.addAction(OKAction)
+            
+            self.presentViewController(alertController, animated: true) {
+                // ...
+            }
+        }
+    }
 }

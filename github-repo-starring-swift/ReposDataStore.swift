@@ -27,5 +27,28 @@ class ReposDataStore {
             completion()
         }
     }
+    
+    func printFirstElement() {
+        GithubAPIClient.getRepositoriesWithCompletion { (reposArray) in
+            print(reposArray.firstObject)
+        }
+    }
+    
+    func toggleStarStatusForRepository(repository: GithubRepository, toggleCompletion: (Bool) -> ()) {
+        GithubAPIClient.checkIfRepositoryIsStarred(repository.fullName, completion: { (starred) in
+            if starred == true {
+                GithubAPIClient.unstarRepository(repository.fullName, completion: {
+                    print("unstarring repository...")
+                })
+                toggleCompletion(false)
+            }
+            else {
+                GithubAPIClient.starRepository(repository.fullName, completion: {
+                    print("starring repository...")
+                })
+                toggleCompletion(true)
+            }
+        })
+    }
 
 }
